@@ -24,3 +24,31 @@ The script filters out irrelevant content like repeating headers, page numbers, 
 ## Hierarchy Assignment
 The identified headings are mapped to H1, H2, and H3 levels based on a dynamic analysis of the top three most prominent heading font styles found in the document.
 
+## How to Build and Run
+
+### Prerequisites
+
+* Docker must be installed and running on your system.
+
+### Instructions
+
+1.  **Clone the Repository**:
+    ```bash
+    git clone [https://github.com/samaritapogula/adobe_hackathon.git](https://github.com/samaritapogula/adobe_hackathon.git)
+    cd adobe_hackathon
+    ```
+
+2.  **Prepare Input**:
+    * Create an `input` directory in the project root.
+    * Place all the PDF files you want to process inside this `input` directory.
+
+3.  **Build the Docker Image**:
+    ```bash
+    docker build --platform linux/amd64 -t adobe_hackathon .
+    ```
+
+4.  **Run the Container**:
+    This command will process all PDFs in the `input` folder and place the resulting `.json` files in a new `output` folder.
+    ```bash
+    docker run --rm -v $(pwd)/input:/app/input:ro -v $(pwd)/output:/app/output adobe_hackathon
+    ```
