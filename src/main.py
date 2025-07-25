@@ -4,13 +4,10 @@ from pathlib import Path
 import fitz  # PyMuPDF
 from collections import Counter
 
-def find_headings_and_title(pdf_path):
+def find_headings_and_title(doc):
     """
     Analyzes a report-style PDF to extract a hierarchical outline.
-    This function is the complete solution for Round 1A.
     """
-    doc = fitz.open(pdf_path)
-    
     all_text_blocks = []
     text_counts = {}
     
@@ -33,17 +30,11 @@ def find_headings_and_title(pdf_path):
                         "page_num": page_num + 1
                     })
 
-    if not all_text_blocks:
-        return {"title": "Error: No text found", "outline": []}
+    if not all_text_blocks: return {"title": "Error: No text found", "outline": []}
 
-    # Sort blocks by reading order for multi-column support
     all_text_blocks.sort(key=lambda b: (b['page_num'], b['bbox'][0], b['bbox'][1]))
     
-    title = ""
-    title_bbox = None
-    header_footer_texts = set()
-
-    # Hybrid title detection
+    title, title_bbox, header_footer_texts = "", None, set()
     if doc.page_count > 1:
         repeating_texts = {text: count for text, count in text_counts.items() if count >= 2}
         if repeating_texts:
@@ -61,18 +52,23 @@ def find_headings_and_title(pdf_path):
                     title = block['text']
                     title_bbox = block['bbox']
     
-    # Filter out TOC, headers, and title
+    headings = []
+    blocks_to_process = all_text_blocks[:]
+    
     toc_page_num = 0
-    for block in all_text_blocks:
+    for block in blocks_to_process:
         if "table of contents" in block['text'].lower():
             toc_page_num = block['page_num']
+            headings.append({"level": "H1", "text": block['text'], "page": block['page_num']})
             break
-    toc_blocks = [b for b in all_text_blocks if b['page_num'] == toc_page_num] if toc_page_num > 0 else []
+    if toc_page_num > 0:
+        blocks_to_process = [b for b in blocks_to_process if b['page_num'] != toc_page_num]
 
-    non_header_blocks = [b for b in all_text_blocks if b['text'] not in header_footer_texts and b not in toc_blocks and b['bbox'] != title_bbox]
+    non_header_blocks = [b for b in blocks_to_process if b['text'] not in header_footer_texts and b['bbox'] != title_bbox]
     font_sizes = [b['size'] for b in non_header_blocks]
     if not font_sizes:
-        return {"title": title, "outline": []}
+        headings.sort(key=lambda x: (x['page'], x.get('level', 'H9')))
+        return {"title": title, "outline": headings}
         
     body_size = max(set(font_sizes), key=font_sizes.count)
     
@@ -82,26 +78,39 @@ def find_headings_and_title(pdf_path):
         is_large_font = b['size'] > body_size
         is_body_font_but_bold = (b['size'] == body_size and b['is_bold'])
         is_heading_pattern = heading_pattern.match(b['text'])
-        
-        if is_large_font or is_body_font_but_bold or is_heading_pattern:
+        if is_heading_pattern or ((is_large_font or is_body_font_but_bold) and b['text'] and b['text'][0].isupper()):
             potential_headings.append(b)
 
-    heading_font_sizes = sorted([size for size in set([b['size'] for b in potential_headings])], reverse=True)[:3]
+    heading_font_sizes = sorted([size for size in set([b['size'] for b in potential_headings])], reverse=True)[:5]
     size_to_level_map = {size: f"H{i+1}" for i, size in enumerate(heading_font_sizes)}
 
-    headings = []
+    last_heading_indent = -1
+    last_heading_level = 0
+    
     for block in potential_headings:
-        if re.search(r'\s{2,}\d+\s*$', block['text']): continue
-        if block['text'].endswith(('.', ',')): continue
+        text = block['text']
+        indent = block['bbox'][0]
+        level_str = size_to_level_map.get(block['size'])
+        level = int(level_str[-1]) if level_str else 9
+        
+        if last_heading_indent != -1 and indent > last_heading_indent + 5 and level >= last_heading_level:
+            continue
+            
+        if re.match(r"^\s*[\•\*\-]\s+", text): continue
+        date_pattern = re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s*\d{4}\b', re.IGNORECASE)
+        year_pattern = re.compile(r'^\s*(19|20)\d{2}\s*$')
+        if date_pattern.search(text) or year_pattern.match(text): continue
+        if re.match(r"^\d+\.$", text.strip()): continue
+        punctuation_count = sum(1 for char in text if char in ",.():")
+        if punctuation_count > 3: continue
             
         heading_level = size_to_level_map.get(block['size'])
         if heading_level:
-            headings.append({
-                "level": heading_level,
-                "text": block['text'],
-                "page": block['page_num']
-            })
+            headings.append({"level": heading_level, "text": text, "page": block['page_num']})
+            last_heading_indent = indent
+            last_heading_level = level
 
+    headings.sort(key=lambda x: (x['page'], [b['bbox'][1] for b in all_text_blocks if b['text'] == x['text'] and b['page_num'] == x['page']][0]))
     return {"title": title, "outline": headings}
 
 def process_all_pdfs_sequentially(input_dir, output_dir):
