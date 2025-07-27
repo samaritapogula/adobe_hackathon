@@ -1,10 +1,14 @@
 {
-  "persona": "Academic Researcher",
-  "job_to_be_done": "Write a literature review on sustainable urban transport in European cities.",
-  "input_documents": [
-    "Final-version-Public-Transport-Declaration-Barcelona-FINAL.pdf",
-    "SUMP_state-of-the-art_of_report.pdf",
-    "sump_guidelines_2019_interactive_document_1.pdf",
-    "UITP-EU-Political-priorities.pdf"
+  "persona": {
+    "role": "Academic Researcher"
+  },
+  "job_to_be_done": {
+    "task": "Write a literature review on sustainable urban transport in European cities."
+  },
+  "documents": [
+    { "filename": "Final-version-Public-Transport-Declaration-Barcelona-FINAL.pdf" },
+    { "filename": "SUMP_state-of-the-art_of_report.pdf" },
+    { "filename": "sump_guidelines_2019_interactive_document_1.pdf" },
+    { "filename": "UITP-EU-Political-priorities.pdf" }
   ]
 }
