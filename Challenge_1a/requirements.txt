@@ -1,2 +1,3 @@
-PyMuPDF
 jsonschema
+PyMuPDF==1.23.14
+unidecode==1.3.8
