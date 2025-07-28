@@ -1,0 +1,11 @@
+{
+  "persona": {
+    "role": "Business Analyst",
+    "job_to_be_done": "extract and summarize key learning objectives from business analysis syllabi"
+  },
+  "documents": [
+    { "filename": "IQBBA CFLBA Syllabus v. 3.0.pdf" },
+    { "filename": "ba-foundation-syllabus.pdf" },
+    { "filename": "bcs-professional-certificate-in-agile-business-analysis.pdf" }
+  ]
+}
