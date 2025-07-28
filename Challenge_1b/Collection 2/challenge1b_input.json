@@ -1,0 +1,19 @@
+{
+  "persona": {
+    "role": "Educational Content Developer"
+  },
+  "job_to_be_done": {
+    "task": "summarize course objectives and learning outcomes from syllabus PDFs"
+  },
+  "documents": [
+    {
+      "filename": "Course-Learning-Objectives-guide-2018.pdf"
+    },
+    {
+      "filename": "CourseBased_SLOmodules.pdf"
+    },
+    {
+      "filename": "COE Writing Learning Objectives2023.pdf"
+    }
+  ]
+}
