@@ -214,7 +214,7 @@ def run_on_all_collections():
         input_file = folder / "challenge1b_input.json"
         output_file = folder / "challenge1b_output.json"
         if input_file.exists():
-            print(f"📄 Processing: {input_file}")
+            print(f"Processing: {input_file}")
             result = process_1b_collection(input_file)
             with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(result, f, indent=2)
@@ -222,6 +222,6 @@ def run_on_all_collections():
 
 
 if __name__ == "__main__":
-    print("🚀 Starting Challenge 1B processor")
+    print("Starting Challenge 1B processor")
     run_on_all_collections()
-    print("🏁 All collections processed.")
+    print("All collections processed.")
